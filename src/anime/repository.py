@@ -20,10 +20,18 @@ class AnimeRepository:
     @classmethod
     def get(cls, value_id) -> AnimeORM | None:
         with Session_maker() as session:
-            return session.get(AnimeORM, value_id)
+            ret = session.get(AnimeORM, value_id)
+
+            if ret is None:
+                raise IndexError
+
+            return ret
 
     @classmethod
-    def list(cls, filter_by: dict) -> Sequence[AnimeORM]:
+    def list(cls, filter_by: dict = None) -> Sequence[AnimeORM]:
+        if filter_by is None:
+            filter_by = {}
+
         with Session_maker() as session:
             if filter_by is None:
                 filter_by = {}
@@ -32,18 +40,20 @@ class AnimeRepository:
             return session.scalars(query).all()
 
     @classmethod
-    def update(cls, value_id: int, values: dict):
+    def update(cls, value_id: int, values: dict) -> int:
         with Session_maker() as session:
             query = update(AnimeORM).where(AnimeORM.id == value_id).values(**values)
-            session.execute(query)
+            ret = session.execute(query)
             session.commit()
+            return ret.rowcount
 
     @classmethod
-    def delete(cls, value_id: int):
+    def delete(cls, value_id: int) -> int:
         with Session_maker() as session:
             query = delete(AnimeORM).where(AnimeORM.id == value_id)
-            session.execute(query)
+            ret = session.execute(query)
             session.commit()
+            return ret.rowcount
 
     @classmethod
     def count(cls) -> int:
@@ -53,8 +63,9 @@ class AnimeRepository:
             return ret.scalar()
 
     @classmethod
-    def delete_all(cls):
+    def delete_all(cls) -> int:
         with Session_maker() as session:
             query = delete(AnimeORM)
-            session.execute(query)
+            ret = session.execute(query)
             session.commit()
+            return ret.rowcount
