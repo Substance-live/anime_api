@@ -42,7 +42,7 @@ class TestRepository:
                 (5, None, pytest.raises(IndexError)),
             ]
         )
-        def test_get_on_id(self, anime_dict, input_id, expected_title, expectation):
+        def test_get_on_id(self, input_id, expected_title, expectation):
             with expectation:
                 assert AnimeRepository.get(input_id).title == expected_title
 
@@ -61,7 +61,7 @@ class TestRepository:
 
             if ret != 0:
                 for attr in input_value.keys():
-                    assert session.get(Anime, input_id).__dict__[attr] == input_value[attr]
+                    assert getattr(session.get(Anime, input_id), attr) == input_value[attr]
 
         @pytest.mark.parametrize(
             "input_id, count_deleted_rows",
@@ -80,25 +80,24 @@ class TestRepository:
             assert session.get(Anime, input_id) is None
 
         @pytest.mark.parametrize(
-            "filter_by, expected_output, expectation",
+            "filter_by, expected_output",
             [
-                ({"status": AnimeStatus.completed}, [1, 3], does_not_raise()),
-                ({"status": AnimeStatus.announced}, [4], does_not_raise()),
-                ({"status": "announced"}, [4], does_not_raise()),
-                ({"status": "wrong value"}, [], does_not_raise()),
-                ({"genre": "senen"}, [1, 2], does_not_raise()),
-                ({"genre": "detective"}, [3], does_not_raise()),
-                ({"genre": "wrong_value"}, [], does_not_raise()),
-                ({"title": "Naruto"}, [1], does_not_raise()),
-                ({"title": "Death note"}, [3], does_not_raise()),
-                ({"title": "wrong value"}, [], does_not_raise()),
-                ({"status": AnimeStatus.announced, "genre": "fantasy"}, [4], does_not_raise()),
+                ({"status": AnimeStatus.completed}, [1, 3]),
+                ({"status": AnimeStatus.announced}, [4]),
+                ({"status": "announced"}, [4]),
+                ({"status": "wrong value"}, []),
+                ({"genre": "senen"}, [1, 2]),
+                ({"genre": "detective"}, [3]),
+                ({"genre": "wrong_value"}, []),
+                ({"title": "Naruto"}, [1]),
+                ({"title": "Death note"}, [3]),
+                ({"title": "wrong value"}, []),
+                ({"status": AnimeStatus.announced, "genre": "fantasy"}, [4]),
             ]
         )
-        def test_filter_by(self, filter_by, expected_output, expectation):
-            with expectation:
-                ret = AnimeRepository.list(filter_by)
-                assert [orm_obj.id for orm_obj in ret] == expected_output
+        def test_filter_by(self, filter_by, expected_output):
+            ret = AnimeRepository.list(filter_by)
+            assert [orm_obj.id for orm_obj in ret] == expected_output
 
         def test_count(self, session):
             for index in range(1, 5):
