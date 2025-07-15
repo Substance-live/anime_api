@@ -1,19 +1,7 @@
-from src.anime.schemas import AnimeCreateSchema, AnimeStatus
-from src.anime.service import AnimeService
+from fastapi import FastAPI
 
-from src.db import Base, engine
+from src.api import main_router
 
-# Base.metadata.drop_all(engine)
-# Base.metadata.create_all(engine)
 
-# anime_1 = AnimeCreateSchema(
-#     title="Demon slayer final",
-#     episodes=1,
-#     status=AnimeStatus.announced,
-#     genre="fantasy"
-# )
-# added_anime = AnimeService.add(session, anime_1)
-
-all_anime = AnimeService.list()
-print("\n".join([str(anime) for anime in all_anime]))
-print(AnimeService.count())
+app = FastAPI()
+app.include_router(main_router)
