@@ -4,11 +4,11 @@ import pytest
 from sqlalchemy import delete
 
 from src.anime.enum.anime_status import AnimeStatus
-from src.anime.models import Anime
+from src.anime.models import AnimeOrm
 from src.anime.repository import AnimeRepository
 from tests.unit_tests.conftest import load_data
 
-
+@pytest.mark.asyncio
 @pytest.mark.usefixtures("delete_after")
 class TestRepository:
 
@@ -23,9 +23,9 @@ class TestRepository:
              pytest.raises(TypeError))
         ]
     )
-    def test_add(self, input_dict, expectation):
+    async def test_add(self, input_dict, expectation):
         with expectation:
-            added_anime = AnimeRepository.add(input_dict)
+            added_anime = await AnimeRepository.add(input_dict)
 
             assert 1 == added_anime.id
             assert input_dict["title"] == added_anime.title
@@ -42,9 +42,9 @@ class TestRepository:
                 (5, None, pytest.raises(IndexError)),
             ]
         )
-        def test_get_on_id(self, input_id, expected_title, expectation):
+        async def test_get_on_id(self, input_id, expected_title, expectation):
             with expectation:
-                assert AnimeRepository.get(input_id).title == expected_title
+                assert (await AnimeRepository.get(input_id)).title == expected_title
 
         @pytest.mark.parametrize(
             "input_id, input_value, count_updated_rows",
@@ -54,14 +54,14 @@ class TestRepository:
                 (5, {'title': "TEST"}, 0)
             ]
         )
-        def test_update(self, session, input_id, input_value, count_updated_rows):
-            ret = AnimeRepository.update(input_id, input_value)
+        async def test_update(self, session, input_id, input_value, count_updated_rows):
+            ret = await AnimeRepository.update(input_id, input_value)
 
             assert ret == count_updated_rows
 
             if ret != 0:
                 for attr in input_value.keys():
-                    assert getattr(session.get(Anime, input_id), attr) == input_value[attr]
+                    assert getattr(await session.get(AnimeOrm, input_id), attr) == input_value[attr]
 
         @pytest.mark.parametrize(
             "input_id, count_deleted_rows",
@@ -73,11 +73,11 @@ class TestRepository:
                 (-1, 0),
             ]
         )
-        def test_delete(self, session, input_id, count_deleted_rows):
-            ret = AnimeRepository.delete(input_id)
+        async def test_delete(self, session, input_id, count_deleted_rows):
+            ret = await AnimeRepository.delete(input_id)
 
             assert ret == count_deleted_rows
-            assert session.get(Anime, input_id) is None
+            assert await session.get(AnimeOrm, input_id) is None
 
         @pytest.mark.parametrize(
             "filter_by, expected_output",
@@ -95,14 +95,14 @@ class TestRepository:
                 ({"status": AnimeStatus.announced, "genre": "fantasy"}, [4]),
             ]
         )
-        def test_filter_by(self, filter_by, expected_output):
-            ret = AnimeRepository.list(filter_by)
+        async def test_filter_by(self, filter_by, expected_output):
+            ret = await AnimeRepository.list(filter_by)
             assert [orm_obj.id for orm_obj in ret] == expected_output
 
-        def test_count(self, session):
+        async def test_count(self, session):
             for index in range(1, 5):
-                query = delete(Anime).where(Anime.id == index)
-                session.execute(query)
-                session.commit()
+                query = delete(AnimeOrm).where(AnimeOrm.id == index)
+                await session.execute(query)
+                await session.commit()
 
-                assert (4 - index) == AnimeRepository.count()
+                assert (4 - index) == await AnimeRepository.count()

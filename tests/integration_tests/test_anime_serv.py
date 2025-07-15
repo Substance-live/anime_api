@@ -7,6 +7,7 @@ from src.anime.schemas import AnimeSchema, AnimeCreateSchema
 from src.anime.service import AnimeService
 
 
+@pytest.mark.asyncio
 @pytest.mark.usefixtures("delete_after")
 class TestService:
 
@@ -21,14 +22,14 @@ class TestService:
             (-1, pytest.raises(IndexError)),
         ]
     )
-    def test_add_and_get(self, anime_model, input_id, expectation):
+    async def test_add_and_get(self, anime_model, input_id, expectation):
         with expectation:
             for model in anime_model:
-                AnimeService.add(model)
+                await AnimeService.add(model)
 
-            assert [AnimeCreateSchema(**model.model_dump()) for model in AnimeService.list()] == anime_model
+            assert [AnimeCreateSchema(**model.model_dump()) for model in await AnimeService.list()] == anime_model
 
-            assert AnimeService.get(input_id) == AnimeSchema(id=input_id, **anime_model[input_id - 1].model_dump())
+            assert await AnimeService.get(input_id) == AnimeSchema(id=input_id, **anime_model[input_id - 1].model_dump())
 
     @pytest.mark.parametrize(
         "update_model, expectation",
@@ -44,16 +45,16 @@ class TestService:
 
         ]
     )
-    def test_update(self, anime_model, update_model: AnimeSchema, expectation):
+    async def test_update(self, anime_model, update_model: AnimeSchema, expectation):
         with expectation:
             for model in anime_model:
-                AnimeService.add(model)
+                await AnimeService.add(model)
 
-            count_update_rows = AnimeService.update(update_model.id, update_model)
+            count_update_rows = await AnimeService.update(update_model.id, update_model)
 
             assert count_update_rows == 1 or expectation != does_not_raise()
 
-            assert AnimeService.get(update_model.id) == update_model
+            assert await AnimeService.get(update_model.id) == update_model
 
     @pytest.mark.parametrize(
         "input_id",
@@ -64,19 +65,19 @@ class TestService:
             4,
         ]
     )
-    def test_delete_right(self, anime_model, input_id):
+    async def test_delete_right(self, anime_model, input_id):
         for model in anime_model:
-            AnimeService.add(model)
+            await AnimeService.add(model)
 
-        assert AnimeService.delete(input_id) == 1
+        assert await AnimeService.delete(input_id) == 1
 
-        assert AnimeService.count() == len(anime_model) - 1
+        assert await AnimeService.count() == len(anime_model) - 1
 
         with pytest.raises(IndexError):
-            AnimeService.get(input_id)
+            await AnimeService.get(input_id)
 
         anime_model.pop(input_id - 1)
-        assert [AnimeCreateSchema(**model.model_dump()) for model in AnimeService.list()] == anime_model
+        assert [AnimeCreateSchema(**model.model_dump()) for model in await AnimeService.list()] == anime_model
 
     @pytest.mark.parametrize(
         "input_id",
@@ -87,13 +88,13 @@ class TestService:
             -99,
         ]
     )
-    def test_delete_wrong(self, anime_model, input_id):
+    async def test_delete_wrong(self, anime_model, input_id):
         for model in anime_model:
-            AnimeService.add(model)
+            await AnimeService.add(model)
 
-        before_list = AnimeService.list()
-        count_del_rows = AnimeService.delete(input_id)
-        after_list = AnimeService.list()
+        before_list = await AnimeService.list()
+        count_del_rows = await AnimeService.delete(input_id)
+        after_list = await AnimeService.list()
 
         assert before_list == after_list
         assert count_del_rows == 0

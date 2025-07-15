@@ -5,7 +5,7 @@ from src.db import Base
 from src.anime.enum.anime_status import AnimeStatus
 
 
-class Anime(Base):
+class AnimeOrm(Base):
     __tablename__ = "anime"
 
     id: Mapped[int] = mapped_column(primary_key=True)

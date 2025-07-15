@@ -1,7 +1,8 @@
+import pytest_asyncio
 import pytest
 
 from src.anime.enum.anime_status import AnimeStatus
-from src.anime.models import Anime
+from src.anime.models import AnimeOrm
 
 
 @pytest.fixture
@@ -15,9 +16,9 @@ def anime_dict():
     return anime
 
 
-@pytest.fixture
-def load_data(session, anime_dict):
+@pytest_asyncio.fixture
+async def load_data(session, anime_dict):
     for value in anime_dict:
-        new_anime = Anime(**value)
+        new_anime = AnimeOrm(**value)
         session.add(new_anime)
-        session.commit()
+        await session.commit()
