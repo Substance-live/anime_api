@@ -1,5 +1,4 @@
 import pytest
-from sqlalchemy import delete
 
 from src.anime.enum.anime_status import AnimeStatus
 from src.anime.models import Anime
@@ -14,14 +13,6 @@ def anime_dict():
         {'title': 'Demon slayer final', 'episodes': 1, 'status': AnimeStatus.announced, 'genre': 'fantasy'}
     ]
     return anime
-
-@pytest.fixture
-def delete_after(session):
-    yield
-    print("\nDeleting all data...")
-    query = delete(Anime)
-    session.execute(query)
-    session.commit()
 
 
 @pytest.fixture

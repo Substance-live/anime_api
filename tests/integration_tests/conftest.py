@@ -13,3 +13,4 @@ def anime_model():
         AnimeCreateSchema(title='Demon slayer final', episodes=1, status=AnimeStatus.announced, genre='fantasy'),
     ]
     return anime
+

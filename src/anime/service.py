@@ -7,7 +7,7 @@ class AnimeService:
 
     @classmethod
     def add(cls,anime_in: AnimeCreateSchema) -> AnimeSchema:
-        anime_value = anime_in.model_dump(exclude_unset=True)
+        anime_value = anime_in.model_dump()
         db_anime = AnimeRepository.add(anime_value)
         return AnimeSchema.model_validate(db_anime)
 
@@ -22,18 +22,18 @@ class AnimeService:
         return [AnimeSchema.model_validate(elem) for elem in db_anime_seq]
 
     @classmethod
-    def update(cls,anime_id: int, anime_update: AnimeSchema):
-        anime_value = anime_update.model_dump(exclude_unset=True)
-        AnimeRepository.update(anime_id, anime_value)
+    def update(cls,anime_id: int, anime_update: AnimeSchema | AnimeCreateSchema) -> int:
+        anime_value = anime_update.model_dump()
+        return AnimeRepository.update(anime_id, anime_value)
 
     @classmethod
-    def delete(cls,anime_id: int):
-        AnimeRepository.delete(anime_id)
+    def delete(cls,anime_id: int) -> int:
+        return AnimeRepository.delete(anime_id)
 
     @classmethod
     def count(cls) -> int:
         return AnimeRepository.count()
 
     @classmethod
-    def delete_all(cls):
-        AnimeRepository.delete_all()
+    def delete_all(cls) -> int:
+        return AnimeRepository.delete_all()
