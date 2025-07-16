@@ -1,0 +1,6 @@
+.venv
+Dockerfile
+test_anime.db
+tests
+pytest.ini
+.gitignore

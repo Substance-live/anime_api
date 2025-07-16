@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  background: #f7f7fa;
+  color: #222;
+}
+
+header {
+  background: #22223b;
+  color: #fff;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+} 
